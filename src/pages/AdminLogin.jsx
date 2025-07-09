@@ -147,13 +147,6 @@ const AdminLogin = () => {
           </motion.button>
         </form>
 
-        <div className="mt-6 p-4 bg-slate-50 rounded-xl">
-          <p className="text-sm text-slate-600 text-center">
-            <strong>Demo Credentials:</strong><br />
-            Email: admin@support.com<br />
-            Password: admin123
-          </p>
-        </div>
       </motion.div>
     </div>
   );
