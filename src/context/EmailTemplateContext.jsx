@@ -94,10 +94,16 @@ export const EmailTemplateProvider = ({ children }) => {
 
   const saveBrandingConfig = async (config) => {
     try {
+      const { data: userData, error: authError } = await supabase.auth.getUser();
+      if (authError || !userData?.user?.id) {
+        throw new Error('User not authenticated');
+      }
+
       const { data, error } = await supabase
         .from('email_config_hub2024')
         .upsert({
           id: 'branding',
+          user_id: userData.user.id,
           config: config,
           updated_at: new Date().toISOString()
         })
@@ -108,6 +114,7 @@ export const EmailTemplateProvider = ({ children }) => {
         console.error('Error saving branding config:', error);
         throw error;
       }
+
       setBrandingConfig(config);
       return data;
     } catch (error) {
@@ -124,10 +131,8 @@ export const EmailTemplateProvider = ({ children }) => {
     const template = getTemplate(templateId);
     if (!template) return '';
 
-    // Merge branding config with provided variables
     const allVariables = { ...brandingConfig, ...variables };
 
-    // Replace all variables in the template
     let rendered = template.html_content;
     let subject = template.subject;
     Object.keys(allVariables).forEach(key => {
