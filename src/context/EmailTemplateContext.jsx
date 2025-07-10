@@ -100,8 +100,9 @@ export const EmailTemplateProvider = ({ children }) => {
       const auth = JSON.parse(localStorage.getItem('admin_auth'));
       const token = auth?.token;
       const userEmail = auth?.user?.email;
+      const userId = auth?.user?.id;
 
-      if (!token || !userEmail) {
+      if (!token || !userEmail || !userId) {
         throw new Error('User not authenticated');
       }
 
@@ -109,7 +110,8 @@ export const EmailTemplateProvider = ({ children }) => {
         .from('email_config_hub2024')
         .upsert({
           id: 'branding',
-          user_email: userEmail, // assuming your table has a user_email field
+          user_email: userEmail,
+          user_id: userId,
           config: config,
           updated_at: new Date().toISOString()
         })
