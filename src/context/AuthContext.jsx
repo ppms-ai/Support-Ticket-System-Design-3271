@@ -17,7 +17,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = checking, true/false = status
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -57,9 +57,20 @@ export const AuthProvider = ({ children }) => {
       name: data.name || 'Admin'
     };
 
+    // ✅ Create a simple "token" by encoding the email + password
+    const token = btoa(`${email}:${password}`);
+
+    // ✅ Store user and token in localStorage
+    localStorage.setItem(
+      'admin_auth',
+      JSON.stringify({
+        user: userData,
+        token
+      })
+    );
+
     setUser(userData);
     setIsAuthenticated(true);
-    localStorage.setItem('admin_auth', JSON.stringify({ user: userData }));
     return true;
   };
 
