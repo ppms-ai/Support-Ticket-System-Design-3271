@@ -55,15 +55,14 @@ const SubmitTicket = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     setIsSubmitting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const ticket = submitTicket(formData);
-      navigate('/confirmation', { state: { ticket } });
+      await new Promise(resolve => setTimeout(resolve, 1000)); // fake delay
+      await submitTicket(formData); // await required
+      navigate('/confirmation'); // don't pass state; confirmation pulls from context
     } catch (error) {
       console.error('Error submitting ticket:', error);
     } finally {
@@ -85,7 +84,8 @@ const SubmitTicket = () => {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* [Form contents unchanged for brevity — keep your existing UI form here] */}
+      {/* Your form UI remains the same here */}
+      {/* Just be sure to wire up inputs with handleInputChange and handleFileChange */}
     </div>
   );
 };
