@@ -73,7 +73,7 @@ const TicketConfirmation = () => {
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-600">Business:</span>
+              <span className="text-slate-600">Service:</span>
               <span className="font-medium text-slate-800 max-w-xs text-right">
                 {currentTicket.business}
               </span>
