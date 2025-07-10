@@ -54,17 +54,28 @@ export const TicketProvider = ({ children }) => {
     );
   };
 
-  return (
-    <TicketContext.Provider
-      value={{
-        tickets,
-        currentTicket,
-        submitTicket,
-        updateTicket,
-        addNote,
-      }}
-    >
-      {children}
-    </TicketContext.Provider>
-  );
+  const getTicketStats = () => {
+  return {
+    total: tickets.length,
+    open: tickets.filter(t => t.status === 'Open').length,
+    inProgress: tickets.filter(t => t.status === 'In Progress').length,
+    resolved: tickets.filter(t => t.status === 'Resolved').length,
+    closed: tickets.filter(t => t.status === 'Closed').length
+  };
+};
+
+return (
+  <TicketContext.Provider
+    value={{
+      tickets,
+      currentTicket,
+      submitTicket,
+      updateTicket,
+      addNote,
+      getTicketStats,
+    }}
+  >
+    {children}
+  </TicketContext.Provider>
+);
 };
