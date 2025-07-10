@@ -21,17 +21,74 @@ export const TicketProvider = ({ children }) => {
   const submitTicket = (formData) => {
     const newTicket = {
       ...formData,
-      ticketNumber: generateTicketNumber(),
+      ticket_number: generateTicketNumber(),
       status: 'Open',
-      createdAt: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      notes: []
     };
 
     setTickets(prev => [...prev, newTicket]);
     setCurrentTicket(newTicket);
   };
 
+  const updateTicket = (ticketId, updates) => {
+    setTickets(prev =>
+      prev.map(ticket =>
+        ticket.ticket_number === ticketId
+          ? { ...ticket, ...updates }
+          : ticket
+      )
+    );
+  };
+
+  const addNote = (ticketId, noteText) => {
+    setTickets(prev =>
+      prev.map(ticket =>
+        ticket.ticket_number === ticketId
+          ? {
+              ...ticket,
+              notes: [
+                ...(ticket.notes || []),
+                {
+                  id: Date.now(),
+                  text: noteText,
+                  created_at: new Date().toISOString(),
+                  author: 'Admin'
+                }
+              ]
+            }
+          : ticket
+      )
+    );
+  };
+
+  const sendCustomerNote = async (ticketId, noteText, isPublic = false) => {
+    // Placeholder for future email logic
+    console.log('Sending email for ticket:', ticketId, noteText, isPublic);
+  };
+
+  const getTicketStats = () => {
+    return {
+      total: tickets.length,
+      open: tickets.filter(t => t.status === 'Open').length,
+      inProgress: tickets.filter(t => t.status === 'In Progress').length,
+      resolved: tickets.filter(t => t.status === 'Resolved').length,
+      closed: tickets.filter(t => t.status === 'Closed').length
+    };
+  };
+
   return (
-    <TicketContext.Provider value={{ tickets, currentTicket, submitTicket }}>
+    <TicketContext.Provider
+      value={{
+        tickets,
+        currentTicket,
+        submitTicket,
+        updateTicket,
+        addNote,
+        sendCustomerNote,
+        getTicketStats
+      }}
+    >
       {children}
     </TicketContext.Provider>
   );
