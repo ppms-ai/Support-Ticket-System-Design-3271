@@ -1,4 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 const AuthContext = createContext();
 
@@ -11,19 +17,18 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = checking, true = authenticated, false = not authenticated
+  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = checking, true/false = status
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Check for saved authentication on component mount
     const savedAuth = localStorage.getItem('admin_auth');
     if (savedAuth) {
       try {
         const authData = JSON.parse(savedAuth);
-        setIsAuthenticated(true);
         setUser(authData.user);
-      } catch (error) {
-        console.error('Error parsing saved auth:', error);
+        setIsAuthenticated(true);
+      } catch (err) {
+        console.error('Error parsing saved admin session:', err);
         localStorage.removeItem('admin_auth');
         setIsAuthenticated(false);
       }
@@ -32,25 +37,35 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = (credentials) => {
-    // IMPORTANT: Change these credentials before going live!
-    // For production, consider using environment variables or a more secure method
-    if (credentials.email === 'admin@support.com' && credentials.password === 'admin123') {
-      const userData = {
-        email: credentials.email,
-        name: 'Admin User'
-      };
-      setIsAuthenticated(true);
-      setUser(userData);
-      localStorage.setItem('admin_auth', JSON.stringify({ user: userData }));
-      return true;
+  const login = async (credentials) => {
+    const { email, password } = credentials;
+
+    const { data, error } = await supabase
+      .from('support_admins_hub2024')
+      .select('*')
+      .eq('email', email)
+      .eq('password', password)
+      .single();
+
+    if (error || !data) {
+      console.error('Login failed:', error);
+      return false;
     }
-    return false;
+
+    const userData = {
+      email: data.email,
+      name: data.name || 'Admin'
+    };
+
+    setUser(userData);
+    setIsAuthenticated(true);
+    localStorage.setItem('admin_auth', JSON.stringify({ user: userData }));
+    return true;
   };
 
   const logout = () => {
-    setIsAuthenticated(false);
     setUser(null);
+    setIsAuthenticated(false);
     localStorage.removeItem('admin_auth');
   };
 
