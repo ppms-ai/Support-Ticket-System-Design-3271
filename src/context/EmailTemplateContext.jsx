@@ -56,6 +56,7 @@ export const EmailTemplateProvider = ({ children }) => {
         console.error('Error loading branding config:', error);
         return;
       }
+
       if (data?.config) {
         setBrandingConfig(prev => ({ ...prev, ...data.config }));
       }
@@ -80,11 +81,13 @@ export const EmailTemplateProvider = ({ children }) => {
         console.error('Error saving template:', error);
         throw error;
       }
+
       setTemplates(prev =>
         prev.map(template =>
           template.id === templateId ? data : template
         )
       );
+
       return data;
     } catch (error) {
       console.error('Error saving template:', error);
@@ -94,8 +97,11 @@ export const EmailTemplateProvider = ({ children }) => {
 
   const saveBrandingConfig = async (config) => {
     try {
-      const { data: userData, error: authError } = await supabase.auth.getUser();
-      if (authError || !userData?.user?.id) {
+      const auth = JSON.parse(localStorage.getItem('admin_auth'));
+      const token = auth?.token;
+      const userEmail = auth?.user?.email;
+
+      if (!token || !userEmail) {
         throw new Error('User not authenticated');
       }
 
@@ -103,7 +109,7 @@ export const EmailTemplateProvider = ({ children }) => {
         .from('email_config_hub2024')
         .upsert({
           id: 'branding',
-          user_id: userData.user.id,
+          user_email: userEmail, // assuming your table has a user_email field
           config: config,
           updated_at: new Date().toISOString()
         })
@@ -135,6 +141,7 @@ export const EmailTemplateProvider = ({ children }) => {
 
     let rendered = template.html_content;
     let subject = template.subject;
+
     Object.keys(allVariables).forEach(key => {
       const regex = new RegExp(`{{${key}}}`, 'g');
       rendered = rendered.replace(regex, allVariables[key] || '');
