@@ -24,10 +24,9 @@ const PRIORITY_OPTIONS = [
   { value: 'High', color: 'text-danger-600 bg-danger-50', icon: '🔴' }
 ];
 
-export default function SubmitTicket() {
+const SubmitTicket = () => {
   const navigate = useNavigate();
   const { submitTicket } = useTickets();
-
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -35,46 +34,48 @@ export default function SubmitTicket() {
     description: '',
     priority: 'Medium',
     business: '',
-    attachment: null
+    attachment: null,
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = () => {
-    const errs = {};
-    if (!formData.name.trim()) errs.name = 'Name is required';
-    if (!formData.email.trim()) errs.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) errs.email = 'Email is invalid';
-    if (!formData.subject.trim()) errs.subject = 'Subject is required';
-    if (!formData.description.trim()) errs.description = 'Description is required';
-    if (!formData.business) errs.business = 'Please select a business/service';
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+    const newErrors = {};
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+    if (!formData.subject.trim()) newErrors.subject = 'Subject is required';
+    if (!formData.description.trim()) newErrors.description = 'Description is required';
+    if (!formData.business) newErrors.business = 'Please select a business/service';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+
     setIsSubmitting(true);
     try {
-      const ticket = submitTicket(formData);
-      // send them to confirmation, carrying the full ticket object:
-      navigate('/confirmation', { state: { ticket } });
+      // submitTicket returns the newly created ticket and sets currentTicket in context
+      submitTicket(formData);
+      // navigate to confirmation page, which will pull currentTicket from context
+      navigate('/confirmation');
     } catch (err) {
-      console.error(err);
+      console.error('Error submitting ticket:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleInput = (field, value) => {
-    setFormData(fd => ({ ...fd, [field]: value }));
-    if (errors[field]) setErrors(es => ({ ...es, [field]: '' }));
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
-  const handleFile = e => {
-    const file = e.target.files[0];
-    setFormData(fd => ({ ...fd, attachment: file }));
+  const handleFileChange = (e) => {
+    const file = e.target.files[0] || null;
+    setFormData(prev => ({ ...prev, attachment: file }));
   };
 
   return (
@@ -84,26 +85,27 @@ export default function SubmitTicket() {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-2xl shadow-soft p-8"
       >
-        {/* ————— Your full form UI goes here, wiring inputs like: ————— */}
-        {/* <input value={formData.name} onChange={e => handleInput('name', e.target.value)} /> */}
-        {/* <select value={formData.business} onChange={e => handleInput('business', e.target.value)}>… */}
-        {/* <input type="file" onChange={handleFile} /> */}
-        {/* …and your Submit button: */}
-        <motion.button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-slate-300 text-white font-medium py-4 rounded-xl"
-        >
-          {isSubmitting
-            ? 'Submitting…'
-            : <>
-                <SafeIcon icon={FiSend} className="h-5 w-5 mr-2" />
-                Submit Support Request
-              </>}
-        </motion.button>
+        {/* form header omitted for brevity */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Name & Email row */}
+          {/* ... your existing inputs, wired to handleInputChange and handleFileChange ... */}
+          <motion.button
+            type="submit"
+            disabled={isSubmitting}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-slate-300 text-white font-medium py-4 rounded-xl transition-colors flex items-center justify-center space-x-2"
+          >
+            {isSubmitting ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+            ) : (
+              <><SafeIcon icon={FiSend} className="h-5 w-5" /><span>Submit Support Request</span></>
+            )}
+          </motion.button>
+        </form>
       </motion.div>
     </div>
   );
-}
+};
+
+export default SubmitTicket;
