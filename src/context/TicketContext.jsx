@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
 const TicketContext = createContext();
 
@@ -18,7 +19,7 @@ export const TicketProvider = ({ children }) => {
     return Math.floor(100000 + Math.random() * 900000).toString();
   };
 
-  const submitTicket = (formData) => {
+  const submitTicket = async (formData) => {
     const newTicket = {
       ...formData,
       ticket_number: generateTicketNumber(),
@@ -27,10 +28,20 @@ export const TicketProvider = ({ children }) => {
       notes: []
     };
 
-    setTickets(prev => [...prev, newTicket]);
-    setCurrentTicket(newTicket);
+    try {
+      const { error } = await supabase
+        .from('support_tickets_hub2024')
+        .insert([newTicket]);
 
-    return newTicket;
+      if (error) throw error;
+
+      setTickets(prev => [...prev, newTicket]);
+      setCurrentTicket(newTicket);
+      return newTicket;
+    } catch (error) {
+      console.error('Error saving ticket to Supabase:', error);
+      return null;
+    }
   };
 
   const updateTicket = (ticketId, updates) => {
