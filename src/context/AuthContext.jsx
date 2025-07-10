@@ -1,13 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
+// Initialize Supabase client
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
+// Create context
 const AuthContext = createContext();
 
+// Hook to use auth
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -16,10 +19,12 @@ export const useAuth = () => {
   return context;
 };
 
+// Auth Provider Component
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [user, setUser] = useState(null);
 
+  // Check for existing auth on mount
   useEffect(() => {
     const savedAuth = localStorage.getItem('admin_auth');
     if (savedAuth) {
@@ -37,6 +42,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // Login function
   const login = async (credentials) => {
     const { email, password } = credentials;
 
@@ -57,10 +63,10 @@ export const AuthProvider = ({ children }) => {
       name: data.name || 'Admin'
     };
 
-    // ✅ Create a simple "token" by encoding the email + password
+    // ✅ Create base64 token using email and password
     const token = btoa(`${email}:${password}`);
 
-    // ✅ Store user and token in localStorage
+    // ✅ Save user + token to localStorage
     localStorage.setItem(
       'admin_auth',
       JSON.stringify({
@@ -74,6 +80,7 @@ export const AuthProvider = ({ children }) => {
     return true;
   };
 
+  // Logout function
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
