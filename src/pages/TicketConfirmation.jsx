@@ -57,7 +57,7 @@ const TicketConfirmation = () => {
             <div className="flex justify-between items-center">
               <span className="text-slate-600">Ticket Number:</span>
               <span className="font-mono font-semibold text-primary-600 bg-primary-50 px-3 py-1 rounded-lg">
-                {currentTicket.ticket_number}
+                {currentTicket.ticketNumber}
               </span>
             </div>
             <div className="flex justify-between items-center">
@@ -126,7 +126,7 @@ const TicketConfirmation = () => {
         {/* Important Note */}
         <div className="mt-8 p-4 bg-slate-100 rounded-xl">
           <p className="text-sm text-slate-600">
-            <strong>Important:</strong> Please save your ticket number <strong>{currentTicket.ticket_number}</strong> for future reference. You'll need it to check your ticket status or when contacting our support team.
+            <strong>Important:</strong> Please save your ticket number <strong>{currentTicket.ticketNumber}</strong> for future reference. You'll need it to check your ticket status or when contacting our support team.
           </p>
         </div>
       </motion.div>
