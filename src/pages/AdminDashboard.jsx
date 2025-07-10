@@ -57,7 +57,7 @@ const AdminDashboard = () => {
     );
   }
 
-  const stats = getTicketStats();
+  const stats = getTicketStats ? getTicketStats() : { total: 0, open: 0, inProgress: 0, resolved: 0, closed: 0 };
   const filteredTickets = tickets.filter(ticket => {
     return (
       (!filters.status || ticket.status === filters.status) &&
@@ -67,19 +67,19 @@ const AdminDashboard = () => {
     );
   });
 
-  const handleUpdateTicket = (ticketId, updates) => {
-    updateTicket(ticketId, updates);
-    if (editingTicket && editingTicket.id === ticketId) {
+  const handleUpdateTicket = (ticketNumber, updates) => {
+    updateTicket(ticketNumber, updates);
+    if (editingTicket && editingTicket.ticketNumber === ticketNumber) {
       setEditingTicket({ ...editingTicket, ...updates });
     }
   };
 
-  const handleAddNote = async (ticketId) => {
+  const handleAddNote = async (ticketNumber) => {
     if (newNote.trim()) {
-      await addNote(ticketId, newNote);
+      await addNote(ticketNumber, newNote);
       // Send customer email if it's a public note
-      if (isPublicNote) {
-        await sendCustomerNote(ticketId, newNote, true);
+      if (isPublicNote && sendCustomerNote) {
+        await sendCustomerNote(ticketNumber, newNote, true);
       }
       setNewNote('');
       setIsPublicNote(false);
@@ -87,18 +87,18 @@ const AdminDashboard = () => {
   };
 
   const exportToCSV = () => {
-    const headers = ['Ticket Number', 'Name', 'Email', 'Subject', 'Status', 'Priority', 'Business', 'Created At'];
+    const headers = ['Ticket Number', 'Name', 'Email', 'Subject', 'Status', 'Priority', 'Service', 'Created At'];
     const csvData = [
       headers.join(','),
       ...filteredTickets.map(ticket => [
-        ticket.ticket_number,
+        ticket.ticketNumber,
         ticket.name,
         ticket.email,
         `"${ticket.subject}"`,
         ticket.status,
         ticket.priority,
         ticket.business,
-        format(new Date(ticket.created_at), 'yyyy-MM-dd HH:mm:ss')
+        format(new Date(ticket.createdAt), 'yyyy-MM-dd HH:mm:ss')
       ].join(','))
     ].join('\n');
 
@@ -243,13 +243,13 @@ const AdminDashboard = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Business</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Service</label>
               <select
                 value={filters.business}
                 onChange={(e) => setFilters(prev => ({ ...prev, business: e.target.value }))}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
-                <option value="">All Businesses</option>
+                <option value="">All Services</option>
                 {BUSINESSES.map(business => (
                   <option key={business} value={business}>{business}</option>
                 ))}
@@ -286,7 +286,7 @@ const AdminDashboard = () => {
         ) : (
           filteredTickets.map((ticket) => (
             <motion.div
-              key={ticket.id}
+              key={ticket.ticketNumber}
               layout
               className="bg-white rounded-xl shadow-soft p-6"
             >
@@ -294,7 +294,7 @@ const AdminDashboard = () => {
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-3">
                     <span className="font-mono text-sm bg-primary-50 text-primary-600 px-2 py-1 rounded">
-                      {ticket.ticket_number}
+                      {ticket.ticketNumber}
                     </span>
                     <span className={`px-2 py-1 rounded text-sm font-medium ${getStatusColor(ticket.status)}`}>
                       {ticket.status}
@@ -312,16 +312,16 @@ const AdminDashboard = () => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <SafeIcon icon={FiClock} className="h-4 w-4 text-slate-400" />
-                      <span className="text-slate-600">{format(new Date(ticket.created_at), 'MMM dd, yyyy')}</span>
+                      <span className="text-slate-600">{format(new Date(ticket.createdAt), 'MMM dd, yyyy')}</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="text-slate-600">Business: {ticket.business}</span>
+                      <span className="text-slate-600">Service: {ticket.business}</span>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2 mt-4 lg:mt-0">
                   <button
-                    onClick={() => setEditingTicket(editingTicket?.id === ticket.id ? null : ticket)}
+                    onClick={() => setEditingTicket(editingTicket?.ticketNumber === ticket.ticketNumber ? null : ticket)}
                     className="flex items-center space-x-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
                   >
                     <SafeIcon icon={FiEdit3} className="h-4 w-4" />
@@ -331,7 +331,7 @@ const AdminDashboard = () => {
               </div>
 
               {/* Edit Panel */}
-              {editingTicket?.id === ticket.id && (
+              {editingTicket?.ticketNumber === ticket.ticketNumber && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
@@ -345,7 +345,7 @@ const AdminDashboard = () => {
                         onChange={(e) => {
                           const newStatus = e.target.value;
                           setEditingTicket(prev => ({ ...prev, status: newStatus }));
-                          handleUpdateTicket(ticket.id, { status: newStatus });
+                          handleUpdateTicket(ticket.ticketNumber, { status: newStatus });
                         }}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       >
@@ -361,7 +361,7 @@ const AdminDashboard = () => {
                         onChange={(e) => {
                           const newPriority = e.target.value;
                           setEditingTicket(prev => ({ ...prev, priority: newPriority }));
-                          handleUpdateTicket(ticket.id, { priority: newPriority });
+                          handleUpdateTicket(ticket.ticketNumber, { priority: newPriority });
                         }}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       >
@@ -378,7 +378,7 @@ const AdminDashboard = () => {
                         onChange={(e) => {
                           const newAssignee = e.target.value;
                           setEditingTicket(prev => ({ ...prev, assignee: newAssignee }));
-                          handleUpdateTicket(ticket.id, { assignee: newAssignee });
+                          handleUpdateTicket(ticket.ticketNumber, { assignee: newAssignee });
                         }}
                         className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                         placeholder="Assign to team member"
@@ -396,7 +396,7 @@ const AdminDashboard = () => {
                             <div className="flex justify-between items-start mb-1">
                               <span className="font-medium text-slate-700">{note.author}</span>
                               <span className="text-xs text-slate-500">
-                                {format(new Date(note.created_at), 'MMM dd, yyyy h:mm a')}
+                                {format(new Date(note.createdAt), 'MMM dd, yyyy h:mm a')}
                               </span>
                             </div>
                             <p className="text-slate-600 text-sm">{note.text}</p>
@@ -408,12 +408,12 @@ const AdminDashboard = () => {
                       <div className="flex items-center space-x-2">
                         <input
                           type="checkbox"
-                          id={`public-${ticket.id}`}
+                          id={`public-${ticket.ticketNumber}`}
                           checked={isPublicNote}
                           onChange={(e) => setIsPublicNote(e.target.checked)}
                           className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                         />
-                        <label htmlFor={`public-${ticket.id}`} className="text-sm text-slate-700 flex items-center space-x-1">
+                        <label htmlFor={`public-${ticket.ticketNumber}`} className="text-sm text-slate-700 flex items-center space-x-1">
                           <SafeIcon icon={FiMail} className="h-4 w-4" />
                           <span>Email customer with this update</span>
                         </label>
@@ -425,10 +425,10 @@ const AdminDashboard = () => {
                           onChange={(e) => setNewNote(e.target.value)}
                           className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                           placeholder={isPublicNote ? "Add update for customer..." : "Add internal note..."}
-                          onKeyPress={(e) => e.key === 'Enter' && handleAddNote(ticket.id)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleAddNote(ticket.ticketNumber)}
                         />
                         <button
-                          onClick={() => handleAddNote(ticket.id)}
+                          onClick={() => handleAddNote(ticket.ticketNumber)}
                           className="flex items-center space-x-1 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors"
                         >
                           <SafeIcon icon={FiPlus} className="h-4 w-4" />
