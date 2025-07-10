@@ -143,7 +143,7 @@ const SubmitTicket = () => {
           {/* Business Selection */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Business/Service <span className="text-red-500">*</span>
+              Which Service Do You Need Help With? <span className="text-red-500">*</span>
             </label>
             <select
               value={formData.business}
@@ -152,7 +152,7 @@ const SubmitTicket = () => {
                 errors.business ? 'border-red-300 focus:border-red-500' : 'border-slate-300 focus:border-primary-500'
               } focus:outline-none focus:ring-2 focus:ring-primary-200`}
             >
-              <option value="">Select a business/service</option>
+              <option value="">Select the service you need help with</option>
               {BUSINESS_OPTIONS.map((business) => (
                 <option key={business} value={business}>
                   {business}
