@@ -29,6 +29,8 @@ export const TicketProvider = ({ children }) => {
 
     setTickets(prev => [...prev, newTicket]);
     setCurrentTicket(newTicket);
+
+    return newTicket;
   };
 
   const updateTicket = (ticketId, updates) => {
@@ -63,7 +65,6 @@ export const TicketProvider = ({ children }) => {
   };
 
   const sendCustomerNote = async (ticketId, noteText, isPublic = false) => {
-    // Placeholder for future email logic
     console.log('Sending email for ticket:', ticketId, noteText, isPublic);
   };
 
