@@ -27,6 +27,7 @@ const PRIORITY_OPTIONS = [
 const SubmitTicket = () => {
   const navigate = useNavigate();
   const { submitTicket } = useTickets();
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -36,6 +37,7 @@ const SubmitTicket = () => {
     business: '',
     attachment: null
   });
+
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -60,9 +62,9 @@ const SubmitTicket = () => {
     setIsSubmitting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // fake delay
-      await submitTicket(formData); // await required
-      navigate('/confirmation'); // don't pass state; confirmation pulls from context
+      await new Promise(resolve => setTimeout(resolve, 1000)); // optional fake delay
+      await submitTicket(formData); // ✅ Await this to ensure ticket is set in context
+      navigate('/confirmation'); // ✅ Confirmation page will use currentTicket from context
     } catch (error) {
       console.error('Error submitting ticket:', error);
     } finally {
@@ -84,8 +86,8 @@ const SubmitTicket = () => {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* Your form UI remains the same here */}
-      {/* Just be sure to wire up inputs with handleInputChange and handleFileChange */}
+      {/* You can now safely use formData, handleInputChange, and handleSubmit in your UI */}
+      {/* If you want, I can also provide the full form JSX again based on Tailwind + your design */}
     </div>
   );
 };
