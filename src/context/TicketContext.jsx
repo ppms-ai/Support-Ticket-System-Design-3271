@@ -1,14 +1,10 @@
 import React, { createContext, useContext, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
 
 const TicketContext = createContext();
-
 export const useTickets = () => {
-  const context = useContext(TicketContext);
-  if (!context) {
-    throw new Error('useTickets must be used within a TicketProvider');
-  }
-  return context;
+  const ctx = useContext(TicketContext);
+  if (!ctx) throw new Error('useTickets must be used within a TicketProvider');
+  return ctx;
 };
 
 export const TicketProvider = ({ children }) => {
@@ -16,77 +12,46 @@ export const TicketProvider = ({ children }) => {
   const [currentTicket, setCurrentTicket] = useState(null);
 
   const generateTicketNumber = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+    // e.g. "SUP-123456"
+    return 'SUP-' + Math.floor(100000 + Math.random() * 900000);
   };
 
-  const submitTicket = async (formData) => {
+  const submitTicket = (formData) => {
     const newTicket = {
       ...formData,
-      ticket_number: generateTicketNumber(),
+      ticketNumber: generateTicketNumber(),
       status: 'Open',
-      created_at: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       notes: []
     };
-
-    try {
-      const { error } = await supabase
-        .from('support_tickets_hub2024')
-        .insert([newTicket]);
-
-      if (error) throw error;
-
-      setTickets(prev => [...prev, newTicket]);
-      setCurrentTicket(newTicket);
-      return newTicket;
-    } catch (error) {
-      console.error('Error saving ticket to Supabase:', error);
-      return null;
-    }
+    // if you later wire up an API, await it here...
+    setTickets(prev => [...prev, newTicket]);
+    setCurrentTicket(newTicket);
+    return newTicket;
   };
 
-  const updateTicket = (ticketId, updates) => {
+  const updateTicket = (ticketNumber, updates) => {
     setTickets(prev =>
-      prev.map(ticket =>
-        ticket.ticket_number === ticketId
-          ? { ...ticket, ...updates }
-          : ticket
+      prev.map(t =>
+        t.ticketNumber === ticketNumber ? { ...t, ...updates } : t
       )
     );
   };
 
-  const addNote = (ticketId, noteText) => {
+  const addNote = (ticketNumber, text) => {
     setTickets(prev =>
-      prev.map(ticket =>
-        ticket.ticket_number === ticketId
+      prev.map(t =>
+        t.ticketNumber === ticketNumber
           ? {
-              ...ticket,
+              ...t,
               notes: [
-                ...(ticket.notes || []),
-                {
-                  id: Date.now(),
-                  text: noteText,
-                  created_at: new Date().toISOString(),
-                  author: 'Admin'
-                }
+                ...(t.notes || []),
+                { id: Date.now(), text, createdAt: new Date().toISOString(), author: 'Admin' }
               ]
             }
-          : ticket
+          : t
       )
     );
-  };
-
-  const sendCustomerNote = async (ticketId, noteText, isPublic = false) => {
-    console.log('Sending email for ticket:', ticketId, noteText, isPublic);
-  };
-
-  const getTicketStats = () => {
-    return {
-      total: tickets.length,
-      open: tickets.filter(t => t.status === 'Open').length,
-      inProgress: tickets.filter(t => t.status === 'In Progress').length,
-      resolved: tickets.filter(t => t.status === 'Resolved').length,
-      closed: tickets.filter(t => t.status === 'Closed').length
-    };
   };
 
   return (
@@ -97,8 +62,6 @@ export const TicketProvider = ({ children }) => {
         submitTicket,
         updateTicket,
         addNote,
-        sendCustomerNote,
-        getTicketStats
       }}
     >
       {children}
