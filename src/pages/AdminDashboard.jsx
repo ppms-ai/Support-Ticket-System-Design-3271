@@ -57,8 +57,9 @@ const AdminDashboard = () => {
     );
   }
 
-  const stats = getTicketStats ? getTicketStats() : { total: 0, open: 0, inProgress: 0, resolved: 0, closed: 0 };
-  const filteredTickets = tickets.filter(ticket => {
+const stats = getTicketStats ? getTicketStats() : { total: 0, open: 0, inProgress: 0, resolved: 0, closed: 0 };
+console.log('Tickets array:', tickets);
+console.log('Stats:', stats);  const filteredTickets = tickets.filter(ticket => {
     return (
       (!filters.status || ticket.status === filters.status) &&
       (!filters.priority || ticket.priority === filters.priority) &&
