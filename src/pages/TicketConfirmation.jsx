@@ -22,9 +22,9 @@ const TicketConfirmation = () => {
   }
 
   const priorityColors = {
-    'Low': 'text-success-600 bg-success-50',
-    'Medium': 'text-warning-600 bg-warning-50',
-    'High': 'text-danger-600 bg-danger-50'
+    Low: 'text-success-600 bg-success-50',
+    Medium: 'text-warning-600 bg-warning-50',
+    High: 'text-danger-600 bg-danger-50',
   };
 
   return (
@@ -38,7 +38,7 @@ const TicketConfirmation = () => {
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
           className="w-20 h-20 bg-success-100 rounded-full flex items-center justify-center mx-auto mb-6"
         >
           <SafeIcon icon={FiCheckCircle} className="h-10 w-10 text-success-600" />
@@ -54,40 +54,40 @@ const TicketConfirmation = () => {
         {/* Ticket Details Card */}
         <div className="bg-slate-50 rounded-xl p-6 mb-8 text-left">
           <h2 className="text-lg font-semibold text-slate-800 mb-4">Ticket Details</h2>
-          
+
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-slate-600">Ticket Number:</span>
               <span className="font-mono font-semibold text-primary-600 bg-primary-50 px-3 py-1 rounded-lg">
-                {currentTicket.ticketNumber}
+                {currentTicket.ticket_number}
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center">
               <span className="text-slate-600">Subject:</span>
               <span className="font-medium text-slate-800 max-w-xs text-right">
                 {currentTicket.subject}
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center">
               <span className="text-slate-600">Priority:</span>
               <span className={`px-3 py-1 rounded-lg font-medium ${priorityColors[currentTicket.priority]}`}>
                 {currentTicket.priority}
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center">
               <span className="text-slate-600">Business:</span>
               <span className="font-medium text-slate-800 max-w-xs text-right">
                 {currentTicket.business}
               </span>
             </div>
-            
+
             <div className="flex justify-between items-center">
               <span className="text-slate-600">Status:</span>
               <span className="px-3 py-1 rounded-lg font-medium bg-blue-50 text-blue-600">
-                Open
+                {currentTicket.status}
               </span>
             </div>
           </div>
@@ -102,7 +102,7 @@ const TicketConfirmation = () => {
               A confirmation email has been sent to {currentTicket.email}
             </p>
           </div>
-          
+
           <div className="bg-warning-50 rounded-xl p-4">
             <SafeIcon icon={FiClock} className="h-6 w-6 text-warning-600 mx-auto mb-2" />
             <h3 className="font-semibold text-slate-800 mb-1">Response Time</h3>
@@ -121,7 +121,7 @@ const TicketConfirmation = () => {
             <SafeIcon icon={FiSearch} className="h-5 w-5" />
             <span>Check Ticket Status</span>
           </Link>
-          
+
           <Link
             to="/"
             className="inline-flex items-center justify-center px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl transition-colors space-x-2"
@@ -134,7 +134,7 @@ const TicketConfirmation = () => {
         {/* Important Note */}
         <div className="mt-8 p-4 bg-slate-100 rounded-xl">
           <p className="text-sm text-slate-600">
-            <strong>Important:</strong> Please save your ticket number <strong>{currentTicket.ticketNumber}</strong> for future reference. 
+            <strong>Important:</strong> Please save your ticket number <strong>{currentTicket.ticket_number}</strong> for future reference. 
             You'll need it to check your ticket status or when contacting our support team.
           </p>
         </div>
